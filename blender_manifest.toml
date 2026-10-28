@@ -1,0 +1,19 @@
+schema_version = "1.0.0"
+
+id = "morcano_bridge"
+version = "0.2.0"
+name = "Morcano bridge"
+tagline = "Send a model to Morcano and make it a print-ready generator"
+maintainer = "Morcano <hello@morcano.app>"
+type = "add-on"
+website = "https://morcano.app"
+tags = ["Import-Export", "3D View"]
+
+blender_version_min = "4.2.0"
+
+license = ["SPDX:GPL-3.0-or-later"]
+copyright = ["2026 Morcano"]
+
+[permissions]
+network = "Send the shown objects to morcano.app"
+files = "Write a temporary export, read fonts if Send fonts is on"
