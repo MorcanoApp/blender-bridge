@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "morcano_bridge"
-version = "0.2.0"
+version = "0.2.1"
 name = "Morcano bridge"
 tagline = "Send a model to Morcano and make it a print-ready generator"
 maintainer = "Morcano <hello@morcano.app>"

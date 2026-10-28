@@ -9,7 +9,7 @@ gets a file.
 
 Blender 4.2 or newer.
 
-1. Download `morcano_bridge-0.2.0.zip` from the [releases](../../releases).
+1. Download `morcano_bridge-0.2.1.zip` from the [releases](../../releases).
 2. Blender: **Edit > Preferences > Get Extensions > ⌄ > Install from Disk**, pick the zip.
 3. In the 3D Viewport press **N** and open the **Morcano** tab.
 

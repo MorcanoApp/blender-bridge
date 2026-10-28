@@ -25,7 +25,7 @@ The same file is the studio's exporter for an uploaded .blend
 bl_info = {
     "name": "Morcano bridge",
     "author": "Morcano",
-    "version": (0, 2, 0),
+    "version": (0, 2, 1),
     "blender": (4, 2, 0),
     "location": "View3D > Sidebar > Morcano",
     "description": "Send the model to a Morcano board and make it a generator",
@@ -45,6 +45,24 @@ DEFAULT_STUDIO = "https://morcano.app"
 #: The only places a scene may go: Morcano, or a studio on this computer.
 _HOSTS = ("morcano.app",)
 _LOCAL = ("localhost", "127.0.0.1", "::1")
+#: Let's Encrypt's ISRG Root X2 (public, valid to 2040; sha256 69:72:9B:8E...:14:70).
+#: morcano.app's chain runs up to it; Blender's Python on Windows checks with
+#: OpenSSL against the system store, which may hold only the expired cross-sign
+#: ("certificate has expired"), so the root goes in alongside the system's.
+_ISRG_ROOT_X2 = """-----BEGIN CERTIFICATE-----
+MIICGzCCAaGgAwIBAgIQQdKd0XLq7qeAwSxs6S+HUjAKBggqhkjOPQQDAzBPMQsw
+CQYDVQQGEwJVUzEpMCcGA1UEChMgSW50ZXJuZXQgU2VjdXJpdHkgUmVzZWFyY2gg
+R3JvdXAxFTATBgNVBAMTDElTUkcgUm9vdCBYMjAeFw0yMDA5MDQwMDAwMDBaFw00
+MDA5MTcxNjAwMDBaME8xCzAJBgNVBAYTAlVTMSkwJwYDVQQKEyBJbnRlcm5ldCBT
+ZWN1cml0eSBSZXNlYXJjaCBHcm91cDEVMBMGA1UEAxMMSVNSRyBSb290IFgyMHYw
+EAYHKoZIzj0CAQYFK4EEACIDYgAEzZvVn4CDCuwJSvMWSj5cz3es3mcFDR0HttwW
++1qLFNvicWDEukWVEYmO6gbf9yoWHKS5xcUy4APgHoIYOIvXRdgKam7mAHf7AlF9
+ItgKbppbd9/w+kHsOdx1ymgHDB/qo0IwQDAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0T
+AQH/BAUwAwEB/zAdBgNVHQ4EFgQUfEKWrt5LSDv6kviejM9ti6lyN5UwCgYIKoZI
+zj0EAwMDaAAwZQIwe3lORlCEwkSHRhtFcP9Ymd70/aTSVaYgLXTWNLxBo1BfASdW
+tL4ndQavEi51mI38AjEAi/V3bNTIZargCyzuFJ0nN6T5U6VR5CmD1/iQMVtCnwr1
+/q4AaOeMSQ+2b1tbFfLn
+-----END CERTIFICATE-----"""
 
 
 # ------------------------------------------------------------------ export
@@ -262,6 +280,17 @@ def studio_url(studio):
     return None
 
 
+def _tls():
+    """The system's trusted roots and ISRG Root X2 (see above); still verified."""
+    import ssl
+    ctx = ssl.create_default_context()
+    try:
+        ctx.load_verify_locations(cadata=_ISRG_ROOT_X2)
+    except ssl.SSLError:
+        pass
+    return ctx
+
+
 def send(studio, only_selected, disk_fonts=False):
     """Export, zip, post to the studio; the board link to open."""
     import io
@@ -289,7 +318,7 @@ def send(studio, only_selected, disk_fonts=False):
                                           "User-Agent": "MorcanoBridge/" + ".".join(
                                               map(str, bl_info["version"]))})
     try:
-        with urllib.request.urlopen(req, timeout=120) as r:
+        with urllib.request.urlopen(req, timeout=120, context=_tls()) as r:
             data = json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         try:
